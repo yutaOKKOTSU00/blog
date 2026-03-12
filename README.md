@@ -88,7 +88,7 @@
 
 ```
 blogforge/
-├── client/                    # React Frontend (Vite)
+├── frontend/                    # React Frontend (Vite)
 │   ├── public/
 │   └── src/
 │       ├── assets/            # Images, fonts, icons
@@ -111,7 +111,7 @@ blogforge/
 │       ├── styles/            # Global styles
 │       └── types/             # TypeScript types/interfaces
 │
-├── server/                    # Express.js Backend
+├── backend/                    # Express.js Backend
 │   ├── src/
 │   │   ├── config/            # DB, env, cloudinary config
 │   │   ├── controllers/       # Route handlers (thin layer)
@@ -156,8 +156,8 @@ cd blog
 npm install
 
 # Ou séparément
-cd client && npm install
-cd ../server && npm install
+cd frontend && npm install
+cd ../backend && npm install
 ```
 
 ### 3. Configurer les variables d'environnement
@@ -170,12 +170,12 @@ cp .env.example .env
 ### 4. Lancer en développement
 
 ```bash
-# Lancer les deux (client + server) depuis la racine
+# Lancer les deux (frontend + backend) depuis la racine
 npm run dev
 
 # Ou séparément
-npm run dev:client   # http://localhost:5173
-npm run dev:server   # http://localhost:5000
+npm run dev:frontend   # http://localhost:5173
+npm run dev:backend   # http://localhost:5000
 ```
 
 ---
@@ -185,13 +185,13 @@ npm run dev:server   # http://localhost:5000
 ### Racine
 
 ```bash
-npm run dev           # Lance client + server en parallèle
-npm run build         # Build client + server
+npm run dev           # Lance frontend + backend en parallèle
+npm run build         # Build frontend + backend
 npm run test          # Lance tous les tests
 npm run lint          # Lint l'ensemble du code
 ```
 
-### Server
+### backend
 
 ```bash
 npm run dev           # Nodemon watch mode
@@ -201,7 +201,7 @@ npm run test:watch    # Watch mode
 npm run seed          # Seed la base de données
 ```
 
-### Client
+### Frontend
 
 ```bash
 npm run dev           # Vite dev server
