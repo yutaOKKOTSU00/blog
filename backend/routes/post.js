@@ -1,6 +1,6 @@
 import express from 'express';
 import Post from '../models/post.js';
-import { validatePost, validatePostQuery, validatePostId } from '../validators/post.js';
+import { validatePost, validatePostUpdate, validatePostQuery, validatePostId } from '../validators/post.js';
 
 const router = express.Router();
 
@@ -10,7 +10,8 @@ router.post('/', validatePost, async (req, res) => {
     const post = await Post.create({
       title: req.body.title,
       content: req.body.content,
-      published: req.body.published
+      published: req.body.published,
+      user_id: req.body.user_id 
     });
 
     res.status(201).json(post);
@@ -59,7 +60,7 @@ router.get('/:id', validatePostId, async (req, res) => {
 });
 
 // Update a specific post
-router.put('/:id', validatePostId, validatePost, async (req, res) => {
+router.put('/:id', validatePostId, validatePostUpdate, async (req, res) => {
   try {
     const post = await Post.findByPk(req.params.id);
 
