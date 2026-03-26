@@ -1,7 +1,6 @@
 // ─────────────────────────────────────────────
 // Post.tsx — Page article avec commentaires réels
 // ─────────────────────────────────────────────
-
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Clock, Heart, Bookmark, Share2, Loader2, AlertCircle, Send, Trash2 } from 'lucide-react'
@@ -10,7 +9,7 @@ import { Button } from '@/components/ui/Button'
 import { usePost, adaptApiPost, readingTime } from '@/hooks/usePosts'
 import { useComments, useCreateComment, useDeleteComment } from '@/hooks/useComments'
 import { useAuth } from '@/store/auth'
-import { MOCK_POSTS, MOCK_COMMENTS, MOCK_CATEGORIES } from '@/lib/mock'
+import { MOCK_POSTS, MOCK_COMMENTS } from '@/lib/mock'
 import { formatDate, timeAgo, initials } from '@/lib/utils'
 import type { Post, Comment } from '@/types'
 
@@ -33,7 +32,7 @@ export default function Post() {
   const [commentBody, setCommentBody] = useState('')
 
   // ── Données du post ───────────────────────────────────────
-  const { data: apiPost, isLoading: postLoading, error: postError } = usePost(slug ?? '')
+  const { data: apiPost, isLoading: postLoading } = usePost(slug ?? '')
 
   // Adapte l'API ou utilise le mock comme fallback
   const post: Post | undefined = apiPost
