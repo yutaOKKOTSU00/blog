@@ -31,7 +31,20 @@ const User = sequelize.define('User', {
     validate: {
       len: [6, Infinity]
     }
-  }
+  },
+  role: {
+    type: DataTypes.ENUM('reader', 'author', 'admin'),
+    defaultValue: 'author',
+    allowNull: false,
+  },
+  bio: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  avatar: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 }, {
   createdAt: 'created_at',
   updatedAt: 'updated_at',
