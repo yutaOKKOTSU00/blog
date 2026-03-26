@@ -31,7 +31,12 @@ router.post('/', authMiddleware, validatePost, async (req, res) => {
 router.get('/', validatePostQuery, async (req, res) => {
   try {
     const where = {};
-    if (req.query.published !== undefined) where.published = req.query.published;
+    // conversion explicite en booléen pour que Sequelize filtre correctement
+    if (req.query.published !== undefined) {
+      const raw = req.query.published;
+      // Après toBoolean() de express-validator, peut être true/false (bool) ou 'true'/'false' (string)
+      where.published = raw === true || raw === 'true' || raw === 1 || raw === '1';
+    }
 
     const posts = await Post.findAll({
       where,
@@ -116,7 +121,7 @@ router.delete('/:id', authMiddleware, validatePostId, async (req, res) => {
     if (!post) {
       return res.status(404).json({ error: `Post with ID ${req.params.id} not found` });
     }
-    
+    // vérification du propriétaire
     if (post.user_id !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Forbidden: you can only delete your own posts' });
     }
