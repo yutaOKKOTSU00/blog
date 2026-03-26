@@ -10,8 +10,6 @@ import commentsRouter from './routes/comment.js';
 const app = express();
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
-
 app.use(morgan('dev'));
 app.use(cors({
   origin: FRONTEND_URL,
