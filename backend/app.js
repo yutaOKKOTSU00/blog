@@ -8,8 +8,15 @@ import commentsRouter from './routes/comment.js';
 
 const app = express();
 
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+
 app.use(morgan('dev'));
-app.use(cors());
+app.use(cors({
+  origin: FRONTEND_URL,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(express.json());
 
 // Routes
@@ -23,7 +30,17 @@ async function initDb() {
     await sequelize.sync();
     console.log('Database synchronized');
   } catch (error) {
-    console.error('Failed to sync database:', error);
+    console.error('Failed to sync database (first pass):', error);
+
+    if (error.name === 'SequelizeUnknownConstraintError') {
+      console.log('Retrying sync with force: true to recover schema conflict.');
+      try {
+        await sequelize.sync({ force: true });
+        console.log('Database synchronized with force: true');
+      } catch (forceError) {
+        console.error('Failed forced sync database:', forceError);
+      }
+    }
   }
 }
 

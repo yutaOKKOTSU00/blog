@@ -1,16 +1,17 @@
 import express from 'express';
 import { Comment, User } from '../models/index.js';
+import { authMiddleware } from '../middleware/auth.js';
 import { validateComment, validateCommentId, validatePostId } from '../validators/comment.js';
 
 const router = express.Router();
 
-// Create a comment on a post
-router.post('/:postId/comments', validatePostId, validateComment, async (req, res) => {
+// Create a comment on a post (auth required)
+router.post('/:postId/comments', authMiddleware, validatePostId, validateComment, async (req, res) => {
   try {
     const comment = await Comment.create({
       body: req.body.body,
       post_id: req.params.postId,
-      user_id: req.body.user_id
+      user_id: req.user.id
     });
 
     res.status(201).json(comment);
