@@ -5,7 +5,7 @@ const validateResults = (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(422).json({
       errors: errors.array(),
-      status: 'Unprocessable Entity'
+      status: 'Unprocessable Entity',
     });
   }
   next();
@@ -13,50 +13,44 @@ const validateResults = (req, res, next) => {
 
 const validateUser = [
   body('username')
-    .isString()
-    .withMessage('Username must be a string')
+    .isString().withMessage('Username must be a string')
     .trim()
-    .isLength({ min: 3, max: 50 })
-    .withMessage('Username must be between 3 and 50 characters'),
+    .isLength({ min: 3, max: 50 }).withMessage('Username must be between 3 and 50 characters'),
   body('email')
-    .isEmail()
-    .withMessage('Must be a valid email address')
+    .isEmail().withMessage('Must be a valid email address')
     .normalizeEmail(),
   body('password')
-    .isString()
-    .withMessage('Password must be a string')
-    .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters'),
-  validateResults
+    .isString().withMessage('Password must be a string')
+    .isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+  validateResults,
 ];
 
 const validateUserUpdate = [
   body('username')
     .optional()
-    .isString()
-    .withMessage('Username must be a string')
+    .isString().withMessage('Username must be a string')
     .trim()
-    .isLength({ min: 3, max: 50 })
-    .withMessage('Username must be between 3 and 50 characters'),
+    .isLength({ min: 3, max: 50 }).withMessage('Username must be between 3 and 50 characters'),
   body('email')
     .optional()
-    .isEmail()
-    .withMessage('Must be a valid email address')
+    .isEmail().withMessage('Must be a valid email address')
     .normalizeEmail(),
   body('password')
     .optional()
-    .isString()
-    .withMessage('Password must be a string')
-    .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters'),
-  validateResults
+    .isString().withMessage('Password must be a string')
+    .isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+  body('bio')
+    .optional()
+    .isString().withMessage('Bio must be a string')
+    .trim()
+    .isLength({ max: 500 }).withMessage('Bio must be less than 500 characters'),
+  validateResults,
 ];
 
 const validateUserId = [
   param('id')
-    .isUUID(4)
-    .withMessage('User ID must be a valid UUID'),
-  validateResults
+    .isUUID(4).withMessage('User ID must be a valid UUID'),
+  validateResults,
 ];
 
 export { validateUser, validateUserUpdate, validateUserId };

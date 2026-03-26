@@ -1,8 +1,5 @@
 // ─────────────────────────────────────────────
-// LoginForm.tsx — Formulaire de connexion
-//
-// Actuellement : simule une connexion avec les données mock.
-// Pour brancher l'API : remplacer la ligne marquée "TODO API"
+// LoginForm.tsx — Formulaire de connexion connecté à l'API
 // ─────────────────────────────────────────────
 
 import { useState } from 'react'
@@ -10,7 +7,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/store/auth'
-import { MOCK_USER } from '@/lib/mock'
+import { authService } from '@/services/auth'
+import type { User } from '@/types'
 
 export function LoginForm() {
   const { login } = useAuth()
@@ -27,23 +25,28 @@ export function LoginForm() {
     setLoading(true)
 
     try {
-      // ── TODO API ──────────────────────────────────────────
-      // Remplacer le bloc mock par :
-      //
-      // import http from '@/lib/http'
-      // const { data } = await http.post('/auth/login', { email, password })
-      // login(data.data.user, data.data.token)
-      // ─────────────────────────────────────────────────────
+      const { user: apiUser, token } = await authService.login(email, password)
+ const user: User = {
+        id:        apiUser.id,
+        username:  apiUser.username,
+        email:     apiUser.email,
+        role:      apiUser.role,
+        bio:       apiUser.bio,
+        avatar:    apiUser.avatar,
+        createdAt: apiUser.created_at,
+      }
 
-      // Simulation d'appel réseau (500ms)
-      await new Promise(res => setTimeout(res, 500))
 
-      // Vérification basique avec les données mock
-      if (email === 'alice@example.com' && password === 'password') {
-        login(MOCK_USER, 'mock-token-xyz')
-        navigate('/')
-      } else {
+      login(user, token)
+      navigate('/')
+    } catch (err: unknown) {
+      const status = (err as { response?: { status: number } })?.response?.status
+      if (status === 401) {
         setError('Email ou mot de passe incorrect.')
+      } else if (status === 422) {
+        setError('Veuillez vérifier vos informations.')
+      } else {
+        setError('Une erreur est survenue. Réessayez plus tard.')
       }
     } finally {
       setLoading(false)
@@ -62,7 +65,6 @@ export function LoginForm() {
         </p>
       </div>
 
-      {/* Message d'erreur global */}
       {error && (
         <div className="mb-4 px-3 py-2.5 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
           {error}
@@ -78,6 +80,7 @@ export function LoginForm() {
           onChange={e => setEmail(e.target.value)}
           required
           autoFocus
+          autoComplete="email"
         />
 
         <div className="flex flex-col gap-1.5">
@@ -88,6 +91,7 @@ export function LoginForm() {
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
+            autoComplete="current-password"
           />
           <Link to="/forgot-password" className="text-xs text-blue-600 hover:underline self-end">
             Mot de passe oublié ?
@@ -98,11 +102,6 @@ export function LoginForm() {
           Se connecter
         </Button>
       </form>
-
-      {/* Indicateur pour le dev — à retirer en prod */}
-      <p className="mt-6 text-xs text-center text-gray-400">
-        Demo : alice@example.com / password
-      </p>
     </div>
   )
 }

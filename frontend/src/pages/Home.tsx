@@ -6,7 +6,7 @@ import { MOCK_POSTS, MOCK_CATEGORIES } from '@/lib/mock'
 
 export default function Home() {
   // On affiche les 3 derniers articles en featured
-  const featured = MOCK_POSTS.slice(0, 3)
+  const featured = MOCK_POSTS.slice(0, 5)
 
   return (
     <div>

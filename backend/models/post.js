@@ -19,9 +19,7 @@ const Post = sequelize.define('Post', {
     type: DataTypes.STRING(120),
     allowNull: false,
     unique: true,
-    validate: {
-      len: [3, 120]
-    }
+    validate: { len: [3, 120] },
   },
   content: {
     type: DataTypes.TEXT,
@@ -58,8 +56,8 @@ const Post = sequelize.define('Post', {
           .trim()
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/^-+|-+$/g, '')
-          .substring(0, 120)
-        if (!post.slug) post.slug = `post-${Date.now()}`
+          .substring(0, 120);
+        if (!post.slug) post.slug = `post-${Date.now()}`;
       }
     },
     beforeUpdate: (post) => {
@@ -70,11 +68,11 @@ const Post = sequelize.define('Post', {
           .trim()
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/^-+|-+$/g, '')
-          .substring(0, 120)
-        if (!post.slug) post.slug = `post-${Date.now()}`
+          .substring(0, 120);
+        if (!post.slug) post.slug = `post-${Date.now()}`;
       }
-    }
-  }
+    },
+  },
 });
 
 export default Post;

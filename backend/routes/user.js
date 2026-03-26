@@ -7,20 +7,17 @@ import { authMiddleware } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Register a new user
+// Register
 router.post('/', validateUser, async (req, res) => {
   try {
     const user = await User.create({
       username: req.body.username,
-      email: req.body.email,
-      password: req.body.password // hashed automatically by the beforeCreate hook
+      email:    req.body.email,
+      password: req.body.password,
     });
-
-    // Never return the password
     const { password, ...userWithoutPassword } = user.toJSON();
     res.status(201).json(userWithoutPassword);
   } catch (error) {
-    // Catch unique constraint violations (duplicate email/username)
     if (error.name === 'SequelizeUniqueConstraintError') {
       return res.status(409).json({ error: 'Username or email already in use' });
     }
@@ -29,58 +26,47 @@ router.post('/', validateUser, async (req, res) => {
   }
 });
 
-// Login a user and return JWT token
+// Login — retourne aussi le role dans le token et la réponse
 router.post('/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    // Validate input
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    // Find user by email
     const user = await User.findOne({ where: { email } });
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    // Compare passwords
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    // Generate JWT token
+    // FIX: inclut le role dans le payload JWT
     const token = generateToken({
-      id: user.id,
-      email: user.email,
-      username: user.username
+      id:       user.id,
+      email:    user.email,
+      username: user.username,
+      role:     user.role,
     });
 
-    // Return user (without password) and token
     const { password: _, ...userWithoutPassword } = user.toJSON();
-    res.json({
-      user: userWithoutPassword,
-      token
-    });
+    res.json({ user: userWithoutPassword, token });
   } catch (error) {
     console.error('Error during login:', error);
     res.status(500).json({ error: 'Failed to login' });
   }
 });
 
-// Get current user (requires auth)
+// Me (requires auth)
 router.get('/me', authMiddleware, async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id, {
-      attributes: { exclude: ['password'] }
+      attributes: { exclude: ['password'] },
     });
-
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
+    if (!user) return res.status(404).json({ error: 'User not found' });
     res.json(user);
   } catch (error) {
     console.error('Error fetching current user:', error);
@@ -88,14 +74,13 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 });
 
-// Get All Users
+// Get all users
 router.get('/', async (req, res) => {
   try {
     const users = await User.findAll({
       attributes: { exclude: ['password'] },
-      order: [['created_at', 'DESC']]
+      order: [['created_at', 'DESC']],
     });
-
     res.json(users);
   } catch (error) {
     console.error('Error fetching users:', error);
@@ -103,22 +88,14 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get a user by ID (with their posts)
+// Get user by ID (with their posts)
 router.get('/:id', validateUserId, async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id, {
       attributes: { exclude: ['password'] },
-      include: [{
-        model: Post,
-        as: 'Posts',
-        order: [['created_at', 'DESC']]
-      }]
+      include: [{ model: Post, order: [['created_at', 'DESC']] }],
     });
-
-    if (!user) {
-      return res.status(404).json({ error: `User with ID ${req.params.id} not found` });
-    }
-
+    if (!user) return res.status(404).json({ error: `User with ID ${req.params.id} not found` });
     res.json(user);
   } catch (error) {
     console.error('Error fetching user:', error);
@@ -126,21 +103,22 @@ router.get('/:id', validateUserId, async (req, res) => {
   }
 });
 
-// Update a user
-router.put('/:id', validateUserId, validateUserUpdate, async (req, res) => {
+// Update user (auth required — only self)
+router.put('/:id', authMiddleware, validateUserId, validateUserUpdate, async (req, res) => {
   try {
-    const user = await User.findByPk(req.params.id);
-
-    if (!user) {
-      return res.status(404).json({ error: `User with ID ${req.params.id} not found` });
+    if (req.user.id !== req.params.id) {
+      return res.status(403).json({ error: 'Forbidden: you can only update your own profile' });
     }
 
+    const user = await User.findByPk(req.params.id);
+    if (!user) return res.status(404).json({ error: `User with ID ${req.params.id} not found` });
+
     if (req.body.username !== undefined) user.username = req.body.username;
-    if (req.body.email !== undefined) user.email = req.body.email;
+    if (req.body.email    !== undefined) user.email    = req.body.email;
     if (req.body.password !== undefined) user.password = req.body.password;
+    if (req.body.bio      !== undefined) user.bio      = req.body.bio;
 
     await user.save();
-
     const { password, ...userWithoutPassword } = user.toJSON();
     res.json(userWithoutPassword);
   } catch (error) {
@@ -152,14 +130,15 @@ router.put('/:id', validateUserId, validateUserUpdate, async (req, res) => {
   }
 });
 
-// Delete a user
-router.delete('/:id', validateUserId, async (req, res) => {
+// Delete user (auth required — only self)
+router.delete('/:id', authMiddleware, validateUserId, async (req, res) => {
   try {
-    const user = await User.findByPk(req.params.id);
-
-    if (!user) {
-      return res.status(404).json({ error: `User with ID ${req.params.id} not found` });
+    if (req.user.id !== req.params.id) {
+      return res.status(403).json({ error: 'Forbidden: you can only delete your own account' });
     }
+
+    const user = await User.findByPk(req.params.id);
+    if (!user) return res.status(404).json({ error: `User with ID ${req.params.id} not found` });
 
     await user.destroy();
     res.status(204).end();

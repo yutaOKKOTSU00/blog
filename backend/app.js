@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
@@ -7,6 +8,7 @@ import usersRouter from './routes/user.js';
 import commentsRouter from './routes/comment.js';
 
 const app = express();
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
@@ -45,11 +47,11 @@ async function initDb() {
 }
 
 app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to the Blog API' });
+  res.json({ message: 'welcome to the Blog ' });
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(` Server running on http://localhost:${PORT}`);
   await initDb();
 });

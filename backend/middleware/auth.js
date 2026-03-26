@@ -1,9 +1,5 @@
 import { verifyToken } from '../lib/jwt.js';
 
-/**
- * Middleware to verify JWT token in Authorization header
- * Extracts token from "Bearer <token>" and attaches user data to req.user
- */
 export function authMiddleware(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
@@ -12,10 +8,8 @@ export function authMiddleware(req, res, next) {
       return res.status(401).json({ error: 'No token provided' });
     }
 
-    const token = authHeader.substring(7); // Remove "Bearer " prefix
+    const token = authHeader.substring(7);
     const decoded = verifyToken(token);
-
-    // Attach user info to request for use in route handlers
     req.user = decoded;
     next();
   } catch (error) {
@@ -23,20 +17,15 @@ export function authMiddleware(req, res, next) {
   }
 }
 
-/**
- * Optional middleware - doesn't fail if no token, just skips auth
- */
 export function optionalAuthMiddleware(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
-
     if (authHeader?.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
       req.user = verifyToken(token);
     }
-  } catch (error) {
-    // Silently ignore invalid tokens in optional auth
+  } catch {
+    // silently ignore
   }
-
   next();
 }

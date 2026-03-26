@@ -13,15 +13,10 @@ const validateResults = (req, res, next) => {
 
 const validateComment = [
   body('body')
-    .isString()
-    .withMessage('Comment body must be a string')
+    .isString().withMessage('Comment body must be a string')
     .trim()
-    .isLength({ min: 1 })
-    .withMessage('Comment body cannot be empty'),
-  body('user_id')
-    .isUUID(4)
-    .withMessage('user_id must be a valid UUID'),
-  validateResults
+    .isLength({ min: 1 }).withMessage('Comment body cannot be empty'),
+  validateResults,
 ];
 
 const validateCommentId = [

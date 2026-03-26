@@ -14,7 +14,7 @@ export default defineConfig({
     port: 5173,
     // Proxy vers l'API Express en dev pour éviter les problèmes CORS
     proxy: {
-      '/api': { target: 'http://localhost:5000', changeOrigin: true },
+      '/api': { target: 'http://localhost:3000', changeOrigin: true },
     },
   },
 

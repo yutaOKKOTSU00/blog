@@ -1,17 +1,13 @@
 // ─────────────────────────────────────────────
 // lib/http.ts — Instance Axios configurée
 //
-// POUR BRANCHER L'API (quand Express est prêt) :
-// 1. Mettre la bonne URL dans .env  → VITE_API_URL=http://localhost:5000/api
-// 2. Les fonctions dans features/*/api.ts utilisent déjà ce client
-// 3. Remplacer les données mock par les vrais appels
 // ─────────────────────────────────────────────
 
 import axios from 'axios'
 
 const http = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? '/api',
-  withCredentials: true, // envoie le cookie refresh token automatiquement
+  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api',
+  withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 })
 
